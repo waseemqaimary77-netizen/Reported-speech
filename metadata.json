@@ -1,0 +1,10 @@
+{
+  "name": "Reported Speech Master",
+  "description": "An interactive bilingual educational app for mastering Reported Speech in English, featuring AI-powered quiz analysis, interactive study guides, and practice tests.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
