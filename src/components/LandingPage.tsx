@@ -20,14 +20,14 @@ export default function LandingPage({ onStart }: { onStart: () => void }) {
           <br />بذكاء وإتقان
         </h1>
         <p className="text-lg md:text-xl text-neutral-600 font-medium">
-          تحويل الكلام المنقول أصبح أسهل من أي وقت مضى. تعلم، حلل، وتدرب باستخدام الذكاء الاصطناعي.
+          تحويل الكلام المنقول أصبح أسهل من أي وقت مضى. تعلم، حلل، وتدرب لتدعيم مهاراتك الدراسية.
         </p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">
         <button 
           onClick={onStart}
-          className="group relative px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2 overflow-hidden"
+          className="group relative px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2 overflow-hidden cursor-pointer"
         >
           <span className="relative z-10 flex items-center gap-2">
             ابدأ رحلة التعلم <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
@@ -44,17 +44,17 @@ export default function LandingPage({ onStart }: { onStart: () => void }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl pt-12">
         <FeatureCard 
           title="دليل دراسي شامل" 
-          desc="شرح مفصل لجميع قواعد الكلام المنقول المستخلصة من المنهج."
+          desc="شرح مفصل لجميع قواعد الكلام المنقول المستخلصة من المنهج المدرسي."
           icon={<BookIcon />}
         />
         <FeatureCard 
-          title="محلل الاختبارات الذكي" 
-          desc="ارفع صورة اختبارك، حدد الأسئلة، ودع الذكاء الاصطناعي يشرح لك الحل."
+          title="محلل ورقة العمل" 
+          desc="تصفح الحلول النموذجية المعتمدة لورقة عمل المادة وشروحات التريكات الامتحانية بالتفصيل."
           icon={<BrainIcon />}
         />
         <FeatureCard 
           title="تدريب تفاعلي" 
-          desc="ولد أسئلة ممارسة لا محدودة لتقوية مهاراتك في التحويل."
+          desc="حل أسئلة تفاعلية متنوعة للتدرب والتحضير للدرجة الكاملة."
           icon={<TestIcon />}
         />
       </div>

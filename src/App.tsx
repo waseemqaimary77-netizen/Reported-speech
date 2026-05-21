@@ -23,7 +23,7 @@ import ExamplesLibrary from './components/ExamplesLibrary';
 type Tab = 'home' | 'study' | 'examples' | 'analyze' | 'practice';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<Tab>('home');
+  const [activeTab, setActiveTab] = useState<Tab>('practice');
 
   const renderContent = () => {
     switch (activeTab) {
@@ -42,10 +42,10 @@ export default function App() {
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 z-50 px-4 py-2 md:top-0 md:bottom-auto md:border-t-0 md:border-b">
         <div className="max-w-5xl mx-auto flex justify-around md:justify-center md:gap-8">
           <NavButton 
-            active={activeTab === 'home'} 
-            onClick={() => setActiveTab('home')} 
-            icon={<HomeIcon size={20} />} 
-            label="الرئيسية" 
+            active={activeTab === 'practice'} 
+            onClick={() => setActiveTab('practice')} 
+            icon={<BrainCircuit size={20} />} 
+            label="تدريب" 
           />
           <NavButton 
             active={activeTab === 'study'} 
@@ -66,10 +66,10 @@ export default function App() {
             label="تحليل" 
           />
           <NavButton 
-            active={activeTab === 'practice'} 
-            onClick={() => setActiveTab('practice')} 
-            icon={<BrainCircuit size={20} />} 
-            label="تدريب" 
+            active={activeTab === 'home'} 
+            onClick={() => setActiveTab('home')} 
+            icon={<HomeIcon size={20} />} 
+            label="الرئيسية" 
           />
         </div>
       </nav>

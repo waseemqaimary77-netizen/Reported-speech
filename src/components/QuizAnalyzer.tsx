@@ -1,338 +1,229 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Stage, Layer, Rect, Image as KonvaImage, Transformer } from 'react-konva';
-import { Upload, Trash2, Brain, Loader2, Info, Camera, X, MousePointer2 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import { AnalysisRegion } from '../types';
+import React, { useState } from 'react';
+import { ChevronDown, Check, AlertCircle, Sparkles } from 'lucide-react';
+
+// Teacher Dunya Awadallah's Exam Database (Pre-loaded & Approved)
+const SCHOOL_QUIZ_SECTIONS = [
+  {
+    title: "المجموعة الأولى (A) - تحويل الجمل إلى الكلام المنقول",
+    instruction: "Change into reported speech. Pay attention to the tense and reporting verb!",
+    questions: [
+      {
+        num: 1,
+        direct: '"Pollution causes dangerous diseases." the doctor comments',
+        reported: "The doctor comments that pollution causes dangerous diseases.",
+        explanation: "فعل القول المكتوب هو (comments) في زمن المضارع البسيط. تذكر القاعدة الذهبية: إذا كان فعل القول مضارعاً (says, comments, tells, asks)، لا يتغير زمن الفعل المكتوب داخل علامتي الاقتباس على الإطلاق! لذلك يبقى الفعل (causes) مضارعاً كما هو.",
+        trick: "الخدعة هنا هي فعل القول المضارع (comments). الكثير من الطلاب يحولون الجملة للماضي بشكل تلقائي، لكن الصحيح هو بقاء الفعل في زمن المضارع!"
+      },
+      {
+        num: 2,
+        direct: '"Could you tell me the way to the mosque, please?" the tourist asks me',
+        reported: "The tourist asks me to tell him the way to the mosque.",
+        explanation: "هذا السؤال يعبر عن طلب مهذب (Polite Request) لأنه يبدأ بـ (Could you) وينتهي بـ (please). عندما نقوم بتحويل الطلبات، نستخدم صيغة (to + الفعل المجرد). نقوم بحذف أسلوب الطلب وسحب الفعل الأساسي (tell) ليصبح (to tell)، ونغير الضمير (me) ليعود على السائح المذكر فيصبح (him).",
+        trick: "طلب مهذب يحتاج إلى ربط بـ (to) والمصدر، كما يتم حذف كلمات الطلب مثل please و Could you."
+      },
+      {
+        num: 3,
+        direct: '"Don\'t make any noise," the teacher says to the students',
+        reported: "The teacher says to the students not to make any noise.",
+        explanation: "هذه الجملة جملة نهي أو أمر منفي تبدأ بـ (Don't). في حالة تحويل النهي، نقوم بحذف كلمة (Don't) واستبدالها دائماً بـ (not to) متبوعة بالفعل مجرداً (not to make).",
+        trick: "عند تحويل النهي (Don't)، استخدم دائماً (not to) وليس (to not)."
+      },
+      {
+        num: 4,
+        direct: '"Do you like action films?" Khaled asks Hani',
+        reported: "Khaled asks Hani if he likes action films.",
+        explanation: "هذا سؤال نعم أو لا (Yes/No Question) يبدأ بفعل مساعد (Do). عند التحويل، نربط دائماً بـ (if). زمن فعل القول مضارع (asks) فلا نغير زمن الأفعال. الضمير (you) يعود على هاني الغائب المذكر فيتحول إلى (he)، ويأخذ الفعل المفرد (likes).",
+        trick: "في الأسئلة المنقولة، يجب تحويل ترتيب السؤال إلى ترتيب جملة عادية (فاعل ثم فعل)، ونربط بـ (if) لأسئلة نعم/لا."
+      },
+      {
+        num: 5,
+        direct: '"What is your favorite subject?" the teacher asks me',
+        reported: "The teacher asks me what my favorite subject is.",
+        explanation: "هذا سؤال كلمة سؤال (Wh-Question) يبدأ بـ (What). نستخدم نفس الكلمة (what) كأداة ربط. تذكر أننا نحول السؤال لجملة خبرية وبما أن فعل القول مضارع (asks) فلا نغير الزمن، نقوم بتقديم الفاعل (my favorite subject) على فعل الكينونة (is) الذي يوضع في النهاية.",
+        trick: "الخطأ الشائع هو كتابة (what is my...)، بينما الترتيب الصحيح للكلام المنقول يقتضي مجيء فعل الكينونة في النهاية (what my favorite subject is)."
+      }
+    ]
+  },
+  {
+    title: "المجموعة الثانية (B) - صياغة الكلام المنقول بالبدء بما بين القوسين",
+    instruction: "Give the reported speech form of the following. Start with the words in brackets.",
+    questions: [
+      {
+        num: 1,
+        direct: '"Be nice to your brother." (My father says)',
+        reported: "My father says to be nice to my/his brother.",
+        explanation: "هذا فعل أمر مباشر ومثبت يبدأ بـ (Be). نستخدم للربط حرف الجر (to) متبوعاً بالفعل مجرداً لتصبح الجملة (to be nice). ونغير ضمير الملكية ليناسب السياق.",
+        trick: "فعل القول مضارع (says)، وطبيعة الجملة أمر مثبت، لذلك نربط مباشرة بـ (to)."
+      },
+      {
+        num: 2,
+        direct: '"Where will you go at the weekend?" (He asked them)',
+        reported: "He asked them where they would go at the weekend.",
+        explanation: "فعل القول في الماضي (asked). نقوم بالربط باستخدام نفس كلمة السؤال (where). وبما أن الكلام موجه لهم (asked them) فإن الضمير (you) يتحول لجمع الغائب (they). كما نقوم بإرجاع الفعل المساعد (will) إلى صيغة الماضي لتصبح (would). ونضعه بعد الفاعل.",
+        trick: "تغيير الزمن من (will) إلى (would)، وجعل الفاعل (they) يسبق الفعل المساعد."
+      },
+      {
+        num: 3,
+        direct: '"She can\'t leave the city because of the traffic." (She said)',
+        reported: "She said that she couldn't leave the city because of the traffic.",
+        explanation: "جملة خبرية عادية وفعل القول في الماضي (said). نقوم بربط الجملتين بكلمة الربط الاختيارية (that)، ثم نقوم بإرجاع الفعل المساعد (can't) خطوة للماضي ليصبح (couldn't) مع بقاء باقي الجملة كما هي.",
+        trick: "تحويل الأفعال الناقصة للماضي: (can't) تصبح دائماً (couldn't) إذا كان فعل القول ماضياً."
+      },
+      {
+        num: 4,
+        direct: '"I mended the car perfectly." (The mechanic said)',
+        reported: "The mechanic said that he had mended the car perfectly.",
+        explanation: "فعل القول ماضٍ (said). الفعل الأساسي للجملة في الماضي البسيط (mended). حسب قواعد التحويل التراجعي للأزمنة، يتم تحويل الماضي البسيط دائماً للزمن الأقدم وهو الماضي التام (had + Past Participle) فيصبح (had mended)، والضمير (I) يصبح (he) عائداً على الميكانيكي.",
+        trick: "الماضي البسيط (mended) يصبح ماضي تام (had mended) للتدليل على أن الحدث وقع في الماضي الأبعد."
+      },
+      {
+        num: 5,
+        direct: '"I have already finished revising for my exam." (She replied)',
+        reported: "She replied that she had already finished revising for her exam.",
+        explanation: "فعل القول ماضٍ (replied). الجملة تبدأ بـ (I) وتتحول إلى (she). وزمن الجملة مضارع تام (have finished) فيتحول تراجعياً للماضي التام (had finished)، وضمير الملكية (my exam) يتحول لـ (her exam).",
+        trick: "المضارع التام (have finished) يُرجع دائماً خطوة للوراء ليصبح ماضي تام (had finished)."
+      }
+    ]
+  },
+  {
+    title: "المجموعة الثالثة (C) - اختيار الإجابة الصحيحة (فخاخ تريكي الشائعة)",
+    instruction: "Choose the correct answer carefully. Analyze the grammar cues!",
+    questions: [
+      {
+        num: 1,
+        direct: '"She asks him when ... buys his new bike." (he - him - himself)',
+        reported: "She asks him when he buys his new bike.",
+        explanation: "في الجملة نحتاج إلى ضمير فاعل (Subject Pronoun) ليقوم بالحدث قبل الفعل المضارع (buys). الضمير الفاعل المناسب هو (he). الضمير (him) مفعول به و(himself) ضمير انعكاسي.",
+        trick: "تحديد موقع الكلمة المطلوبة في الجملة التابعة: قبل الفعل دائماً نستخدم ضمير الفاعل الأساسي."
+      },
+      {
+        num: 2,
+        direct: '"He asked when ... have dinner." (could they - they could - can they)',
+        reported: "He asked when they could have dinner.",
+        explanation: "في الكلام المنقول، يتم إلغاء صيغة السؤال الاستفهام والعودة للترتيب الخبري (الفاعل أولاً ثم الفعل): الفاعل هو (they) متبوعاً بالماضي من can وهو (could) لأن فعل القول ماضي (asked). الترتيب الصحيح هو (they could).",
+        trick: "انتبه! الكثير يختارون (could they) لأنهم يظنون أنه سؤال، لكن في الكلام المنقول يتحول السؤال لجملة عادية فيتقدم الفاعل على الفعل المساعد."
+      },
+      {
+        num: 3,
+        direct: 'Peter says to John "Why ... so late?" (are you - you are - you were)',
+        reported: "are you",
+        explanation: "انتبه بشدة! هنا الجملة وضعت داخل علامتي اقتباس مزدوجتين \"...\"، وهذا يعني أن الكلام لا يزال كلاماً مباشراً (Direct Speech) ولم يتم تفريغه أو نقله بعد. في السؤال المباشر نبقي دائماً على صيغة السؤال التقليدية (الفعل المساعد قبل الفاعل) فنختار (are you).",
+        trick: "علامات الاقتباس تعني أن الجملة مباشرة 100%! لا تقم بنقل القواعد بل اختر صيغة السؤال المباشرة العادية."
+      },
+      {
+        num: 4,
+        direct: '"He asked me ... the door." (open - could you open - to open)',
+        reported: "He asked me to open the door.",
+        explanation: "هذا أسلوب طلب منقول غير مباشر (Indirect Command/Request). لصياغة الطلب المنقول نستخدم دائماً أداة الربط (to) متبوعة بالفعل المصدر (to open).",
+        trick: "لتحويل الطلبات والأوامر نستخدم دائماً الصيغة المصدرية المباشرة (to + Verb)."
+      },
+      {
+        num: 5,
+        direct: '"The teacher ... us that they could finish on time." (says - told - said)',
+        reported: "The teacher told us that they could finish on time.",
+        explanation: "يوجد في الجملة مفعول به مباشر وهو الضمير (us). الفعل الوحيد من بين الخيارات الذي يتطلب مفعولاً به مباشرة بعده بدون حرف جر هو الفعل (told). بينما الفعل (said) يحتاج إلى حرف الجر to ليليه مفعول (যেমন: said to us).",
+        trick: "القاعدة تقول: (told + object) مفعول به، بينما (said + that) بدون مفعول به مباشر بدون to."
+      }
+    ]
+  }
+];
 
 export default function QuizAnalyzer() {
-  const [image, setImage] = useState<HTMLImageElement | null>(null);
-  const [base64Image, setBase64Image] = useState<string | null>(null);
-  const [regions, setRegions] = useState<AnalysisRegion[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [explanation, setExplanation] = useState<string | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [newRegion, setNewRegion] = useState<AnalysisRegion | null>(null);
-  const [isCameraActive, setIsCameraActive] = useState(false);
-  const [tool, setTool] = useState<'draw' | 'select'>('draw');
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [stageSize, setStageSize] = useState({ width: 500, height: 600 });
-  const containerRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<any>(null);
-  const trRef = useRef<any>(null);
+  // Solved School Quiz Open State
+  const [openedQuestions, setOpenedQuestions] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (containerRef.current) {
-        const width = containerRef.current.offsetWidth;
-        const height = Math.min(window.innerHeight * 0.7, width * 1.33);
-        setStageSize({ width, height });
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, [image, isCameraActive]);
-
-  useEffect(() => {
-    if (selectedId && trRef.current) {
-      const selectedNode = stageRef.current.findOne('#' + selectedId);
-      if (selectedNode) {
-        trRef.current.nodes([selectedNode]);
-        trRef.current.getLayer().batchDraw();
-      }
-    }
-  }, [selectedId]);
-
-  const processFile = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new window.Image();
-      img.src = reader.result as string;
-      img.onload = () => {
-        setImage(img);
-        setBase64Image(reader.result as string);
-        setRegions([]);
-        setSelectedId(null);
-        setExplanation(null);
-      };
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) processFile(file);
-  };
-
-  const startCamera = async () => {
-    setIsCameraActive(true);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } 
-      });
-      if (videoRef.current) videoRef.current.srcObject = stream;
-    } catch (err) {
-      alert("تعذر الوصول إلى الكاميرا. يرجى التأكد من إعطاء الصلاحيات.");
-      setIsCameraActive(false);
-    }
-  };
-
-  const capturePhoto = () => {
-    if (videoRef.current) {
-      const canvas = document.createElement('canvas');
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      const ctx = canvas.getContext('2d');
-      ctx?.drawImage(videoRef.current, 0, 0);
-      const dataUrl = canvas.toDataURL('image/png');
-      const img = new window.Image();
-      img.src = dataUrl;
-      img.onload = () => {
-        setImage(img);
-        setBase64Image(dataUrl);
-        stopCamera();
-        setRegions([]);
-        setSelectedId(null);
-        setExplanation(null);
-      };
-    }
-  };
-
-  const stopCamera = () => {
-    if (videoRef.current?.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
-    }
-    setIsCameraActive(false);
-  };
-
-  const handleMouseDown = (e: any) => {
-    if (!image || isAnalyzing) return;
-    
-    // Deselect if clicking on empty space
-    if (e.target === e.target.getStage() || e.target.name() === 'background') {
-      setSelectedId(null);
-      if (tool === 'draw') {
-        const pos = e.target.getStage().getPointerPosition();
-        setNewRegion({ id: 'region-' + Date.now().toString(), x: pos.x, y: pos.y, width: 0, height: 0 });
-      }
-      return;
-    }
-
-    // Select clicked region
-    const id = e.target.id();
-    if (id && id.startsWith('region-')) {
-      setSelectedId(id);
-      setTool('select');
-    }
-  };
-
-  const handleMouseMove = (e: any) => {
-    if (!newRegion) return;
-    const pos = e.target.getStage().getPointerPosition();
-    setNewRegion({
-      ...newRegion,
-      width: pos.x - newRegion.x,
-      height: pos.y - newRegion.y,
-    });
-  };
-
-  const handleMouseUp = () => {
-    if (newRegion && (Math.abs(newRegion.width) > 10 || Math.abs(newRegion.height) > 10)) {
-      setRegions([...regions, newRegion]);
-      setSelectedId(newRegion.id);
-      setTool('select');
-    }
-    setNewRegion(null);
-  };
-
-  const handleTransformEnd = (e: any) => {
-    const node = e.target;
-    const newRegions = regions.map(r => {
-      if (r.id === node.id()) {
-        return {
-          ...r,
-          x: node.x(),
-          y: node.y(),
-          width: node.width() * node.scaleX(),
-          height: node.height() * node.scaleY(),
-        };
-      }
-      return r;
-    });
-    setRegions(newRegions);
-    node.scaleX(1);
-    node.scaleY(1);
-  };
-
-  const deleteSelected = () => {
-    if (selectedId) {
-      setRegions(regions.filter(r => r.id !== selectedId));
-      setSelectedId(null);
-    }
-  };
-
-  const analyzeQuiz = async () => {
-    if (!base64Image || regions.length === 0) return;
-    setIsAnalyzing(true);
-    setExplanation(null);
-    try {
-      const response = await fetch('/api/analyze-quiz', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: base64Image, regions }),
-      });
-      const data = await response.json();
-      setExplanation(data.explanation);
-    } catch (error) {
-      setExplanation("عذراً، حدث خطأ أثناء تحليل الصورة.");
-    } finally {
-      setIsAnalyzing(false);
-    }
+  const toggleQuestion = (sectionIdx: number, qIdx: number) => {
+    const key = `${sectionIdx}-${qIdx}`;
+    setOpenedQuestions(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
   };
 
   return (
-    <div className="space-y-8 py-6">
-      <div className="text-right">
-        <h2 className="text-3xl font-black text-neutral-900 mb-2">محلل الاختبارات الذكي</h2>
-        <p className="text-neutral-500">ارفع صورة اختبارك، ارسم مربعات، واحصل على شرح فوري باللغة العربية.</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="space-y-4" ref={containerRef}>
-          {!image && !isCameraActive ? (
-            <div className="flex flex-col gap-4">
-              <label className="flex flex-col items-center justify-center w-full min-h-[300px] border-4 border-dashed border-neutral-200 rounded-[3rem] bg-white cursor-pointer hover:bg-neutral-50 transition-colors py-12 shadow-inner">
-                <Upload className="w-12 h-12 text-neutral-300 mb-4" />
-                <span className="text-neutral-500 font-bold font-sans">ارفع صورة من جهازك</span>
-                <input type="file" className="hidden" onChange={handleUpload} accept="image/*" />
-              </label>
-              <button 
-                onClick={startCamera}
-                className="w-full py-8 bg-blue-50 border-2 border-blue-100 rounded-[2.5rem] flex flex-col items-center justify-center text-blue-600 hover:bg-blue-100 transition-all font-bold gap-2 shadow-sm"
-              >
-                <Camera size={32} />
-                <span>التقط صورة بالكاميرا</span>
-              </button>
-            </div>
-          ) : isCameraActive ? (
-            <div className="relative rounded-[3rem] overflow-hidden bg-black aspect-[3/4] flex items-center justify-center shadow-2xl border-8 border-white">
-              <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
-              <div className="absolute bottom-10 left-0 right-0 flex justify-center gap-6 items-center">
-                <button onClick={stopCamera} className="p-4 bg-white/20 backdrop-blur-xl text-white rounded-full hover:bg-white/40 transition-colors border border-white/30"><X size={24} /></button>
-                <button onClick={capturePhoto} className="p-1 pr-1.5 pl-1.5 bg-white rounded-full shadow-2xl ring-4 ring-white/30 active:scale-90 transition-transform">
-                  <div className="w-16 h-16 rounded-full border-4 border-blue-600 flex items-center justify-center text-blue-600">
-                    <Camera size={32} />
-                  </div>
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex gap-2 justify-end mb-2">
-                 <button 
-                  onClick={deleteSelected}
-                  disabled={!selectedId}
-                  className="px-4 py-2 bg-red-100 text-red-600 rounded-xl font-bold flex items-center gap-2 disabled:opacity-30"
-                >
-                  <Trash2 size={18} /> حذف المحدد
-                </button>
-                <button 
-                  onClick={() => setTool('draw')}
-                  className={`px-4 py-2 rounded-xl font-bold flex items-center gap-2 ${tool === 'draw' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-neutral-100 text-neutral-600'}`}
-                >
-                  رسم <Brain size={18} />
-                </button>
-                <button 
-                  onClick={() => setTool('select')}
-                  className={`px-4 py-2 rounded-xl font-bold flex items-center gap-2 ${tool === 'select' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-neutral-100 text-neutral-600'}`}
-                >
-                  تعديل <MousePointer2 size={18} />
-                </button>
-              </div>
-
-              <div className="relative bg-white border-2 border-neutral-100 rounded-[2rem] shadow-2xl overflow-hidden">
-                <Stage
-                  width={stageSize.width}
-                  height={stageSize.height}
-                  ref={stageRef}
-                  onMouseDown={handleMouseDown}
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUp}
-                  onTouchStart={handleMouseDown}
-                  onTouchMove={handleMouseMove}
-                  onTouchEnd={handleMouseUp}
-                >
-                  <Layer>
-                    <KonvaImage name="background" image={image} width={stageSize.width} height={stageSize.height} />
-                    {regions.map((region) => (
-                      <Rect
-                        key={region.id}
-                        id={region.id}
-                        {...region}
-                        draggable={tool === 'select'}
-                        stroke={selectedId === region.id ? "#3b82f6" : "#2563eb"}
-                        strokeWidth={selectedId === region.id ? 5 : 3}
-                        dash={selectedId === region.id ? [] : [10, 5]}
-                        fill={selectedId === region.id ? "rgba(59, 130, 246, 0.2)" : "rgba(37, 99, 235, 0.1)"}
-                        cornerRadius={4}
-                        onTransformEnd={handleTransformEnd}
-                        onDragEnd={handleTransformEnd}
-                      />
-                    ))}
-                    {newRegion && (
-                      <Rect {...newRegion} stroke="#2563eb" strokeWidth={2} dash={[5, 2]} />
-                    )}
-                    {tool === 'select' && <Transformer ref={trRef} boundBoxFunc={(oldBox, newBox) => (newBox.width < 10 || newBox.height < 10 ? oldBox : newBox)} />}
-                  </Layer>
-                </Stage>
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-white rounded-3xl border border-neutral-200 shadow-lg">
-                <button onClick={() => { setImage(null); setRegions([]); setSelectedId(null); setExplanation(null); }} className="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-100 transition-colors"><Trash2 size={24} /></button>
-                <div className="flex flex-col items-end">
-                   <span className="text-xs font-bold text-neutral-400">عدد المناطق: {regions.length}</span>
-                   <span className="text-xs text-neutral-400 mt-0.5">يمكنك تحريك وتكبير المربعات لتعديل الاختيار</span>
-                </div>
-                <button 
-                  onClick={analyzeQuiz}
-                  disabled={isAnalyzing || regions.length === 0}
-                  className="px-8 py-3 bg-blue-600 text-white rounded-2xl font-bold flex items-center gap-3 disabled:bg-neutral-200 disabled:shadow-none hover:bg-blue-700 transition-all shadow-xl shadow-blue-100"
-                >
-                  {isAnalyzing ? <Loader2 className="animate-spin" size={24} /> : <Brain size={24} />}
-                  <span>تحليل الأسئلة</span>
-                </button>
-              </div>
-            </div>
-          )}
+    <div className="space-y-8 py-4">
+      {/* Pinned school worksheet solution screen */}
+      <div className="space-y-10 max-w-4xl mx-auto">
+        <div className="text-right space-y-3 font-sans">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs px-4 py-1.5 rounded-full font-black shadow-md shadow-amber-100">
+            <Sparkles size={14} />
+            <span>جزء خاص بـ وسيم قيمري - 10 Grade</span>
+          </div>
+          <h2 className="text-3xl font-black text-neutral-900 leading-tight">حلول ورقة عمل الكلام المنقول المعتمدة</h2>
+          <p className="text-neutral-500 font-medium">تحتوي هذه الصفحة على الحل النموذجي والشرح التفصيلي لورقة عمل (Reported Speech) لجميع الأقسام وشرح التريكات الخداعية لحصد الدرجة الكاملة.</p>
         </div>
 
-        {/* Results */}
-        <div className="space-y-6">
-          <div className="bg-white border border-neutral-100 rounded-[2.5rem] p-8 shadow-sm h-full min-h-[400px]">
-            {isAnalyzing ? (
-              <div className="flex flex-col items-center justify-center h-full space-y-4 py-20">
-                <div className="relative">
-                  <div className="absolute -inset-4 bg-blue-100 rounded-full animate-ping opacity-20" />
-                  <Brain size={64} className="text-blue-600 animate-pulse" />
-                </div>
-                <p className="text-xl font-bold text-neutral-600 animate-bounce text-right">وسيم، الذكاء الاصطناعي يحلل اختبارك...</p>
-              </div>
-            ) : explanation ? (
-              <div className="prose prose-blue max-w-none text-right">
-                <div className="markdown-body text-right" dir="rtl">
-                   <ReactMarkdown>{explanation}</ReactMarkdown>
+        <div className="space-y-12">
+          {SCHOOL_QUIZ_SECTIONS.map((section, sIdx) => (
+            <div key={sIdx} className="space-y-6">
+              <div className="bg-white rounded-[2rem] border border-neutral-100 p-6 md:p-8 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 left-0 h-2 bg-gradient-to-l from-blue-500 to-indigo-600" />
+                <div className="text-right space-y-2">
+                  <h3 className="text-xl font-black text-neutral-900">{section.title}</h3>
+                  <p className="text-xs font-mono text-neutral-400 dir-ltr">{section.instruction}</p>
                 </div>
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-neutral-300 space-y-4">
-                <Brain size={64} />
-                <p className="font-bold text-xl">سيظهر الشرح المفصل هنا</p>
-                <p className="text-sm">حدد منطقة الرسم ثم اضغط تحليل</p>
+
+              <div className="space-y-4">
+                {section.questions.map((q, qIdx) => {
+                  const isOpen = !!openedQuestions[`${sIdx}-${qIdx}`];
+                  return (
+                    <div 
+                      key={qIdx}
+                      className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden hover:border-blue-200 transition-all duration-300"
+                    >
+                      {/* Question Header Accordion Toggle */}
+                      <button
+                        onClick={() => toggleQuestion(sIdx, qIdx)}
+                        className="w-full p-6 text-right flex items-center justify-between gap-4 cursor-pointer"
+                      >
+                        <div className={`p-2 rounded-full transition-transform duration-200 ${isOpen ? 'bg-neutral-100 rotate-180' : 'bg-neutral-50'}`}>
+                          <ChevronDown size={18} className="text-neutral-500" />
+                        </div>
+                        <div className="flex-1 text-right space-y-1">
+                          <div className="flex items-center gap-2 justify-end mb-1">
+                            <span className="text-xs bg-blue-50 text-blue-600 px-2.5 py-0.5 rounded-lg font-black">السؤال {q.num}</span>
+                          </div>
+                          <p className="text-lg font-mono font-bold text-neutral-800 leading-relaxed text-right">{q.direct}</p>
+                        </div>
+                      </button>
+
+                      {/* Collapsible Content */}
+                      {isOpen && (
+                        <div className="px-6 pb-6 pt-2 border-t border-neutral-50 bg-neutral-50/50 space-y-6">
+                          {/* Answer Block */}
+                          <div className="space-y-2 text-right">
+                            <span className="text-[10px] font-black tracking-widest text-blue-500 uppercase">الجواب النموذجي المعتمد (Reported Speech)</span>
+                            <div className="bg-green-50 border border-green-100 p-4 rounded-xl flex items-center gap-3 justify-between">
+                              <span className="bg-green-500 text-white p-1 rounded-full"><Check size={14} /></span>
+                              <p className="text-lg font-mono font-bold text-green-700 leading-relaxed text-left flex-1 pl-2">{q.reported}</p>
+                            </div>
+                          </div>
+
+                          {/* Applied Grammatical Rules */}
+                          <div className="space-y-2 text-right">
+                            <span className="text-[10px] font-black tracking-widest text-neutral-400 uppercase">القواعد المطبقة والخطوات</span>
+                            <p className="text-neutral-600 font-medium leading-relaxed bg-white border border-neutral-100 p-4 rounded-xl text-sm text-right flex justify-end">
+                              {q.explanation}
+                            </p>
+                          </div>
+
+                          {/* Trick alert label */}
+                          <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3 items-start text-right">
+                            <div className="flex-1">
+                              <h5 className="font-black text-amber-800 text-sm mb-1">تنبيه ذكي للخدعة الامتحانية ⚠️</h5>
+                              <p className="text-amber-700 text-xs leading-relaxed font-semibold">{q.trick}</p>
+                            </div>
+                            <AlertCircle size={18} className="text-amber-500 transform scale-x-[-1] mt-0.5 flex-shrink-0" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            )}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
