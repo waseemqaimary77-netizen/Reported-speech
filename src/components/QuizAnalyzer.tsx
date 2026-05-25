@@ -147,7 +147,7 @@ export default function QuizAnalyzer() {
         <div className="text-right space-y-3 font-sans">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs px-4 py-1.5 rounded-full font-black shadow-md shadow-amber-100">
             <Sparkles size={14} />
-            <span>جزء خاص بـ وسيم قيمري - 10 Grade</span>
+            <span>جزء خاص بـ وسيم قيمري وأكرم عواد - 10 Grade</span>
           </div>
           <h2 className="text-3xl font-black text-neutral-900 leading-tight">حلول ورقة عمل الكلام المنقول المعتمدة</h2>
           <p className="text-neutral-500 font-medium">تحتوي هذه الصفحة على الحل النموذجي والشرح التفصيلي لورقة عمل (Reported Speech) لجميع الأقسام وشرح التريكات الخداعية لحصد الدرجة الكاملة.</p>

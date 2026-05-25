@@ -95,7 +95,7 @@ export default function App() {
           <Sparkles size={16} className="text-amber-400" />
           <span className="font-medium">مشروع المادة النهائي - اللغة الإنجليزية</span>
         </div>
-        <p>بإشراف المعلمة: دنيا عوض الله | إعداد الطالب: وسيم قيمري</p>
+        <p>بإشراف المعلمة: دنيا عوض الله | إعداد الطلاب: وسيم قيمري وأكرم عواد</p>
       </footer>
     </div>
   );

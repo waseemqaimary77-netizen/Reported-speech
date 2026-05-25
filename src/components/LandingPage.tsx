@@ -37,7 +37,7 @@ export default function LandingPage({ onStart }: { onStart: () => void }) {
         
         <div className="px-6 py-4 bg-white border border-neutral-200 rounded-2xl font-semibold text-neutral-600 flex items-center gap-2">
           <Sparkles className="text-amber-400" />
-          <span>مشروع الطالب: وسيم قيمري</span>
+          <span>مشروع الطلاب: وسيم قيمري وأكرم عواد</span>
         </div>
       </div>
 
